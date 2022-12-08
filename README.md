@@ -1,5 +1,9 @@
 # 501b_2p
 
+## use this repo
+- would recommend using this on the server
+- `git clone https://github.com/iwahle/501b_2p.git`
+
 ## how to install `suite2p`
 Follow steps 1-7 here: https://suite2p.readthedocs.io/en/latest/installation.html.
 If you are doing processing on the server and using the GUI to visualize results

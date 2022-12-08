@@ -1,0 +1,4 @@
+data/raw/*
+!data/raw/placeholder.txt
+data/processed/*
+!data/processed/placeholder.txt

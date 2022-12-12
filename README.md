@@ -4,6 +4,8 @@
 - would recommend using this on the server
 - `git clone https://github.com/iwahle/501b_2p.git`
 
+## Use Suite2p to automate steps from ROI extraction to spike deconvolution
+* All updates are within `suite2p_hybrid_1212.ipynb`, while Suite2p + [GUI] is required to run the notebok. Instructions should be self included, and data used in this experiment is `f2_data.bin`. Further troubleshooting and validation need to be done. Batch processing script is also coming soon.
 
 ## use DeepCell Label to segment images
 1. compute the mean of a recording over time:
@@ -26,17 +28,6 @@
 3. generate df/f traces
   - call `python src/get_roi_activity path/to/original/recording path/to/y.ome.tiff path/to/save.npy`
   - if things have not exploded by this point, this will save an .npy file where you tell it to with a n_rois x n_timeframes matrix of df/f traces
-
-    
-
-
-
-
-
-
-
-
-
 
 
 ## old instructions on suite2p stuff

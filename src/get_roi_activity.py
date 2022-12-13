@@ -101,10 +101,13 @@ if __name__=='__main__':
     # recording_fp = sys.argv[1]
     # roi_fp = sys.argv[2]
     # output_fp = sys.argv[3]
+    fly_dir = 'f2_f'
     data_path = '/usr/people/iwahle/501b_2p/data'
-    recording_fp = os.path.join(data_path, 'raw/f4_f/data.bin')
-    roi_fp = os.path.join(data_path, 'raw/f4_f/y.ome.tiff')
-    output_dir = os.path.join(data_path, 'processed/f4_f')
+    recording_fp = os.path.join(data_path, f'raw/{fly_dir}/data.bin')
+    roi_fp = os.path.join(data_path, f'raw/{fly_dir}/y.ome.tiff')
+    output_dir = os.path.join(data_path, f'processed/{fly_dir}')
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
     plt.imshow(imread(roi_fp))
     plt.savefig('tmp.png')
 

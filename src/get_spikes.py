@@ -19,7 +19,7 @@ def main(dff_fp, output_dir, model_name='Global_EXC_30Hz_smoothing25ms',
     model_folder='/usr/people/iwahle/Cascade/Pretrained_models'):
 
     # load df/f traces
-    traces = np.load('/usr/people/iwahle/501b_2p/data/processed/f4_f/data_roi_activity.npy')
+    traces = np.load(dff_fp)
 
     # download model
     model_name = 'Global_EXC_30Hz_smoothing25ms'
@@ -45,6 +45,7 @@ def main(dff_fp, output_dir, model_name='Global_EXC_30Hz_smoothing25ms',
 if __name__=='__main__':
     # dff_fp = sys.argv[1]
     # output_dir = sys.argv[2]
-    dff_fp = '/usr/people/iwahle/501b_2p/data/processed/f4_f/data_roi_activity.npy'
-    output_dir = '/usr/people/iwahle/501b_2p/data/processed/f4_f'
+    fly_dir = 'f2_f'
+    dff_fp = f'/usr/people/iwahle/501b_2p/data/processed/{fly_dir}/data_roi_activity.npy'
+    output_dir = f'/usr/people/iwahle/501b_2p/data/processed/{fly_dir}'
     main(dff_fp, output_dir)

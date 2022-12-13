@@ -16,43 +16,72 @@ from suite2p.extraction import extraction_wrapper, oasis, preprocess
 
 
 
-def main(roi_fp, reg_file_fp, save_path):
+def main(roi_fp, reg_file_fp, save_path, ops_fp):
 
-    # load roi mask
-    rois = imread(roi_fp)
-    uniq_val = np.unique(rois.flatten())
+    # load bin file and split up by recording session
+    bin = BF(512,512,reg_file_fp).data
+    filelist = np.load(ops_fp, allow_pickle=True).item()['filelist']
+    rec_frames = bin.shape[0] / len(filelist)
+    
+    # make sure recordings are same size
+    try:
+        assert rec_frames==int(rec_frames)
+    except:
+        print('Rec frames not integer')
+        return
+    
+    for fli in range(len(filelist)):
+        print('----- Current recording: ', filelist[fli].split('\\')[-1])
+        start = int(fli*rec_frames)
+        end = int((fli+1)*rec_frames)
+        write_dir = os.path.join(reg_file_fp.replace('data.bin',''), 'split_recs')
+        write_fp = os.path.join(write_dir, filelist[fli].split('\\')[-1]).replace('.tif', '.bin')
+        if not os.path.exists(write_dir):
+            os.mkdir(write_dir)
+        BF(512,512,read_filename=reg_file_fp, 
+            write_filename=write_fp).write(bin[start:end])
+    
 
-    # construct stats dict in format compatible with suite2p
-    # stat should be a list containing all the x/y pixels locations and the 
-    # lambda values (1 in this case),
-    # median is just the center of the ROI
-    stats_0 = []
-    for idx, val in enumerate(uniq_val[1:]):
-        coordinates = np.where(rois == val)
-        stats_0.append({
-            'xpix' : coordinates[0].flatten(),
-            'ypix' : coordinates[1].flatten(),
-            'lam' : np.ones(coordinates[0].shape),
-            'med' : [np.mean(coordinates[0].flatten()), np.mean(coordinates[1].flatten())]
-            }
-        )
-        
-    # overwrite default ops to match our experimental setup
-    ops = default_ops()
-    ops["fs"] = 30
-    ops['tau'] = 1.5
-    ops['reg_file'] = reg_file_fp
-    ops['Lx'] = 512
-    ops['Ly'] = 512
+        # load roi mask
+        rois = imread(roi_fp)
+        uniq_val = np.unique(rois.flatten())
 
-    # get spikes
-    stat_orig = {}
-    F, Fneu, F_chan2, Fneu_chan2, spks, ops, manual_roi_stats = masks_and_traces(
-        ops, stats_0, stat_orig)
+        # construct stats dict in format compatible with suite2p
+        # stat should be a list containing all the x/y pixels locations and the 
+        # lambda values (1 in this case),
+        # median is just the center of the ROI
+        stats_0 = []
+        for idx, val in enumerate(uniq_val[1:]):
+            coordinates = np.where(rois == val)
+            stats_0.append({
+                'xpix' : coordinates[0].flatten(),
+                'ypix' : coordinates[1].flatten(),
+                'lam' : np.ones(coordinates[0].shape),
+                'med' : [np.mean(coordinates[0].flatten()), np.mean(coordinates[1].flatten())]
+                }
+            )
+            
+        # overwrite default ops to match our experimental setup
+        ops = default_ops()
+        ops["fs"] = 30
+        ops['tau'] = 1.5
+        ops['reg_file'] = write_fp
+        ops['Lx'] = 512
+        ops['Ly'] = 512
 
-    # save F and spikes
-    np.save(os.path.join(save_path, 'suite2p_F.npy'), F)
-    np.save(os.path.join(save_path, 'suite2p_spikes.npy'), spks)
+        # get spikes
+        stat_orig = {}
+        F, Fneu, F_chan2, Fneu_chan2, spks, ops, manual_roi_stats = masks_and_traces(
+            ops, stats_0, stat_orig)
+
+        # save F and spikes
+        if not os.path.exists(os.path.join(save_path, 'split_recs')):
+            os.mkdir(os.path.join(save_path, 'split_recs'))
+        np.save(os.path.join(save_path, 'split_recs', filelist[fli].split('\\')[-1].split('.tif')[0] + '_suite2p_F.npy'), F)
+        np.save(os.path.join(save_path, 'split_recs', filelist[fli].split('\\')[-1].split('.tif')[0] + '_suite2p_spikes.npy'), spks)
+
+        # delete bin
+        os.remove(write_fp)
 
 if __name__=='__main__':
     fly_dirs = ['f2_f', 'f4_f', 'f5_f_depth34', 'f5_f_depth54']
@@ -62,6 +91,7 @@ if __name__=='__main__':
         roi_fp = os.path.join(data_path, fly_dir, 'y.ome.tiff')
         reg_file_fp =  os.path.join(data_path, fly_dir, 'data.bin')
         save_path = os.path.join(data_path.replace('raw', 'processed'), fly_dir)
+        ops_fp = os.path.join(data_path, fly_dir, 'ops.npy')
         if not os.path.exists(save_path):
             os.mkdir(save_path)
-        main(roi_fp, reg_file_fp, save_path)
+        main(roi_fp, reg_file_fp, save_path, ops_fp)

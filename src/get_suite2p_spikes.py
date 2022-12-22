@@ -21,19 +21,21 @@ def main(roi_fp, reg_file_fp, save_path, ops_fp):
     # load bin file and split up by recording session
     bin = BF(512,512,reg_file_fp).data
     filelist = np.load(ops_fp, allow_pickle=True).item()['filelist']
-    rec_frames = bin.shape[0] / len(filelist)
+    frames_per_file = np.load(ops_fp, allow_pickle=True).item()['frames_per_file']
+    # rec_frames = bin.shape[0] / len(filelist)
     
-    # make sure recordings are same size
-    try:
-        assert rec_frames==int(rec_frames)
-    except:
-        print('Rec frames not integer')
-        return
+    # # make sure recordings are same size
+    # try:
+    #     assert rec_frames==int(rec_frames)
+    # except:
+    #     print('Rec frames not integer')
+    #     return
     
+    end = 0
     for fli in range(len(filelist)):
         print('----- Current recording: ', filelist[fli].split('\\')[-1])
-        start = int(fli*rec_frames)
-        end = int((fli+1)*rec_frames)
+        start = end # int(fli*rec_frames)
+        end += frames_per_file[fli] # int((fli+1)*rec_frames)
         write_dir = os.path.join(reg_file_fp.replace('data.bin',''), 'split_recs')
         write_fp = os.path.join(write_dir, filelist[fli].split('\\')[-1]).replace('.tif', '.bin')
         if not os.path.exists(write_dir):
@@ -84,7 +86,7 @@ def main(roi_fp, reg_file_fp, save_path, ops_fp):
         os.remove(write_fp)
 
 if __name__=='__main__':
-    fly_dirs = ['f2_f', 'f4_f', 'f5_f_depth34', 'f5_f_depth54']
+    fly_dirs = ['f4_f'] # ['f2_f', 'f4_f', 'f5_f_depth34', 'f5_f_depth54']
     data_path = '/usr/people/iwahle/501b_2p/data/raw'
     for fly_dir in fly_dirs:
         print('Current fly: ', fly_dir)
